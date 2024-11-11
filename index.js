@@ -34,8 +34,8 @@ wss.on("connection", function (ws) {
   //var addr = { host: "localhost", port: 8090 };
 
   client.on("connect", function () {
-    console.log("client:connect:" + addr.host);
-    ws.send(addr.host);
+    //console.log("client:connect:" + addr.host);
+    ws.send(addr.ipv4);
   });
 
   client.on("error", function (ex) {
@@ -43,7 +43,7 @@ wss.on("connection", function (ws) {
   });
 
   client.on("data", function (data) {
-    console.log("client:data");
+    //console.log("client:data");
     //console.log(data.toString());
     if (ws.readyState == ws.OPEN) {
       ws.send(data);
@@ -51,7 +51,7 @@ wss.on("connection", function (ws) {
   });
 
   client.on("close", function () {
-    console.log("client:close");
+    //console.log("client:close");
     ws.close();
     client.destroy(); // kill client after server's response
   });
@@ -63,7 +63,7 @@ wss.on("connection", function (ws) {
     //console.log(isBinary);
     //if (typeof(message) == "object"){
     if (isBinary == true){
-      console.log("ws:message:object");
+      //console.log("ws:message:object");
       //console.log(message);
       client.write(message);
     }
@@ -72,9 +72,14 @@ wss.on("connection", function (ws) {
       console.log("ws:message:string: " + message);
       addr = JSON.parse(message);
       if (addr.type == "tcp") {
-        dns.lookup(addr.host, (err, address, family) => {
-          if(err) throw err;
-          client.connect(addr.port, address);
+        dns.lookup(addr.host, 4, (err, address, family) => {
+          if (err) {
+            ws.close();
+            return;
+          } //throw err;
+          console.log("dns: " + address);
+          addr.ipv4 = address;
+          client.connect(addr.port, addr.ipv4);
         });
         //client.connect(addr.port, addr.host);
       }
@@ -85,7 +90,7 @@ wss.on("connection", function (ws) {
   });
 
   ws.on("close", function () {
-    console.log("ws:close");
+    //console.log("ws:close");
     //ws.destroy();
     client.destroy();
   });
