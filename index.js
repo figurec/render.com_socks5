@@ -77,7 +77,7 @@ wss.on("connection", function (ws) {
             ws.close();
             return;
           } //throw err;
-          console.log("dns: " + address);
+          //console.log("dns: " + address);
           addr.ipv4 = address;
           client.connect(addr.port, addr.ipv4);
         });
